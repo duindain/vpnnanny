@@ -9,10 +9,12 @@ from starlette.routing import Route
 from sqlalchemy.sql import exists
 from sqlalchemy.sql import func
 from sqlalchemy.sql import asc
+import file_helper
 
 # Configuration from environment variables or '.env' file.
 config = Config('.env')
 DATABASE_URL = config('DATABASE_URL')
+VPN_DIR = config('VPNPath')
 
 # Database table definitions.
 metadata = sqlalchemy.MetaData()
@@ -36,6 +38,9 @@ engine = sqlalchemy.create_engine(
     DATABASE_URL, connect_args={"check_same_thread": False}
 )
 metadata.create_all(engine)
+
+if database.query(vpns).first() is None:
+
 
 async def list_vpns(request):
     query = vpns.select().order_by(asc(vpns.c.updatedOn))
@@ -71,6 +76,11 @@ async def add_vpn(request):
     return JSONResponse({
         "completed": True
     })
+
+async def populate_table():
+    vpnScriptPaths = get_filepaths(config('VPNPath'), config('VPNFileExtension'))
+    for f in vpnScriptPaths:
+        print f
 
 routes = [
     #Mount('/', app=StaticFiles(directory='/app/app/src/site/index.html'), name="index"),
