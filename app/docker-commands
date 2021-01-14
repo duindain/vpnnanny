@@ -1,0 +1,5 @@
+docker stop getting-started
+docker rm getting-started
+docker build -t getting-started . 
+docker run -d --name getting-started -p 3454:80 -v $(pwd):/app getting-started /start-reload.sh
+docker logs -f getting-started
