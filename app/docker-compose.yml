@@ -1,0 +1,14 @@
+version: "3.7"
+
+services:
+  app:
+    image: tiangolo/uvicorn-gunicorn-starlette:python3.8-alpine3.10
+    build:
+      context: ./getting-started
+      dockerfile: ./Dockerfile
+    ports:
+      - 3454:3454
+    working_dir: /app
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--debug", "--port", "80", "--reload-dir", "/app"]
+  volumes:
+    /Users/employment/Downloads/data/config/vpnnanny:/app

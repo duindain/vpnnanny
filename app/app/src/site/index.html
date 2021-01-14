@@ -1,0 +1,113 @@
+<?<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>VPN Nanny</title>
+    <script src="static/js/jquery-3.5.1.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="static/libraries/bootstrap-5.0.0-beta1-dist/css/bootstrap.min.css"/>
+    <script type="text/javascript" src="static/libraries/bootstrap-5.0.0-beta1-dist/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="static/libraries/DataTables/datatables.min.css"/>
+    <script type="text/javascript" src="static/libraries/DataTables/datatables.min.js"></script>
+
+    <script type="text/javascript" src="static/libraries/DataTables/datatables.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="static/css/app.css"/>
+    <script type="text/javascript" src="static/js/app.js"></script>
+  </head>
+  <body>
+    <div class='container-fluid'>
+      <div class="row justify-content-md-center" id="first-element">
+        <div class="col-md-auto">
+          <h5>Current VPN Dodgy Bro's VPN, last modified 11:31 am Tue 3 Nov 2020</h5>
+        </div>
+      </div>
+      <div class="row justify-content-md-center">
+        <div class="col-md-auto badges" style="display: block;">
+          <button type="button" class="btn btn-secondary filter_button" data-filter="Queued">
+            Queued <span class="badge badge-light">11637</span>
+          </button>
+          <button type="button" class="btn btn-dark filter_button" data-filter="Encoding" style="display: none;">
+            Encoding <span class="badge badge-light"></span>
+          </button>
+          <button type="button" class="btn btn-info filter_button" data-filter="Evaluating" style="display: none;">
+            Evaluating <span class="badge badge-light"></span>
+          </button>
+          <button type="button" class="btn btn-success filter_button" data-filter="Replaced">
+            Replaced <span class="badge badge-light">6859</span>
+          </button>
+          <button type="button" class="btn btn-warning filter_button" data-filter="Flagged">
+            Flagged <span class="badge badge-light">2</span>
+          </button>
+          <button type="button" class="btn btn-danger filter_button" data-filter="Failed deleting" style="display: none;">
+            Failed deleting <span class="badge badge-light"></span>
+          </button>
+        </div>
+      </div>
+      <div class='row'>
+        <div class='col'>
+          <table id="vpnTable" class="display vpnTable">
+            <thead>
+                <tr>
+                    <th>id</th>
+                    <th>Name</th>
+                    <th>Path</th>
+                    <th>Score</th>
+                    <th>Upload</th>
+                    <th>Download</th>
+                    <th>Created on</th>
+                    <th>Updated on</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>vpn boop</td>
+                    <td>/opt/vpn boop.vpn</td>
+                    <td>3</td>
+                    <td>20</td>
+                    <td>15</td>
+                    <td>12/3/2020</td>
+                    <td>14/10/2020</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>vpn soup</td>
+                    <td>/opt/vpn soup.vpn</td>
+                    <td>-3</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>8/4/2020</td>
+                    <td>16/7/2020</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>vpn baddy</td>
+                    <td>/opt/vpn baddy.vpn</td>
+                    <td>-2</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>7/4/2020</td>
+                    <td>4/7/2020</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>vpn bunny</td>
+                    <td>/opt/vpn bunny.vpn</td>
+                    <td>-1</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>18/2/2020</td>
+                    <td>14/1/2020</td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
