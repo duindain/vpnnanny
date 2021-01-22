@@ -9,7 +9,7 @@ from starlette.routing import Route
 from sqlalchemy.sql import exists
 from sqlalchemy.sql import func
 from sqlalchemy.sql import asc
-import file_helper
+from . import file_helper
 
 # Configuration from environment variables or '.env' file.
 config = Config('.env')
@@ -40,6 +40,8 @@ engine = sqlalchemy.create_engine(
 metadata.create_all(engine)
 
 if database.query(vpns).first() is None:
+    print("Database is empty, scanning for vpn scripts")
+    populate_table
 
 
 async def list_vpns(request):
@@ -80,7 +82,7 @@ async def add_vpn(request):
 async def populate_table():
     vpnScriptPaths = get_filepaths(config('VPNPath'), config('VPNFileExtension'))
     for f in vpnScriptPaths:
-        print f
+        print(f)
 
 routes = [
     #Mount('/', app=StaticFiles(directory='/app/app/src/site/index.html'), name="index"),
