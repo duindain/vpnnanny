@@ -25,6 +25,20 @@ vpns = sqlalchemy.Table(
     sqlalchemy.Column("updatedOn", sqlalchemy.DateTime(timezone=True), onupdate=func.now()),
 )
 
+activeVpn = sqlalchemy.Table(
+    "activeVpn",
+    metadata,
+    sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True, autoincrement=True),
+    sqlalchemy.Column("vpnid", sqlalchemy.Integer, nullable=False),
+    sqlalchemy.Column("score", sqlalchemy.Integer, default=0),
+    sqlalchemy.Column("upload", sqlalchemy.Float, default=0),
+    sqlalchemy.Column("download", sqlalchemy.Float, default=0),
+    sqlalchemy.Column("smallDownloadCount", sqlalchemy.Integer, default=0),
+    sqlalchemy.Column("onlyUploadCount", sqlalchemy.Integer, default=0),
+    sqlalchemy.Column("createdOn", sqlalchemy.DateTime(timezone=True), server_default=func.now()),
+    sqlalchemy.Column("updatedOn", sqlalchemy.DateTime(timezone=True), onupdate=func.now()),
+)
+
 database = databases.Database(DATABASE_URL)
 
 engine = sqlalchemy.create_engine(
@@ -42,16 +56,29 @@ async def upsert_vpn(data):
     if vpn == null:
         query = vpns.insert().values(
            name=data["name"],
-           path=data["path"],
-           score=data["score"],
-           upload=data["upload"],
-           download=data["download"]
-           )
+           path=data["path"])
     else:
        query = vpns.update().values(
            score=data["score"],
            upload=data["upload"],
            download=data["download"]).where(id == vpn.id)
+
+    await database.execute(query)
+    return True
+
+async def upsert_active_vpn(data):
+    currentVpn = activeVpn.query.filter_by(id == data['id']).first() if data['id'] > 0 else null
+    if currentVpn == null:
+        query = activeVpn.insert().values(
+           name=data["name"],
+           vpnid=data['vpnid'])
+    else:
+       query = activeVpn.update().values(
+           score=data["score"],
+           upload=data["upload"],
+           download=data["download"],
+           smallDownloadCount=data["smallDownloadCount"],
+           onlyUploadCount=data["onlyUploadCount"]).where(id == currentVpn.id)
 
     await database.execute(query)
     return True
@@ -72,8 +99,16 @@ async def has_vpns():
     return database.query(vpns).first() is not None
 
 async def active_vpn():
-
+    currentVpn = database.query(activeVpn).first()
+    if currentVpn is None
+        currentVpn = get_random_vpn
+        upsert_active_vpn({'id'=> 0, 'vpnid'=>currentVpn.id})
+        return await active_vpn()
+    return currentVpn
 
 async def get_random_vpn():
     stmt = database.query(vpns).order_by(func.random())
     return stmt.first()
+
+async def clear_active_vpn():
+    database.query(activeVpn).truncate()

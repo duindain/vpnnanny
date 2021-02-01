@@ -19,33 +19,48 @@ else if
 
 if activeVpn is not null
     (evaluated_usage, activeVpn) = evaluate_usage(activeVpn)
-    record_usage(activeVpn)
+    if evaluated_usage.action == 'keep'
+        activeVpn.score++;
+        record_usage(activeVpn)
+    else
+        activeVpn.score--;
+        rotate_or_remove_vpn(activeVpn)
 
 async def populate_table():
     vpnScriptPaths = get_filepaths(config('VPNPath'), config('VPNFileExtension'))
     for f in vpnScriptPaths:
         print(f)
-        upsert_vpn({'id'=> 0, 'name'=>os.path.basename(f), 'path'=>f, 'score'=>0, 'upload'=>0, 'download'=>0});
+        upsert_vpn({'id'=> 0, 'name'=>os.path.basename(f), 'path'=>f});
 
 async def record_usage(activeVpn):
-    upsert_vpn({'id'=> activeVpn.id, 'score'=>activeVpn.score, 'upload'=>activeVpn.upload, 'download'=>activeVpn.download})
+    upsert_active_vpn({'id'=> activeVpn.id, 'score'=>activeVpn.score, 'upload'=>activeVpn.upload, 'download'=>activeVpn.download, 'smallDownloadCount'=>activeVpn.smallDownloadCount, 'onlyUploadCount'=>activeVpn.onlyUploadCount})
 
 async def evaluate_usage(activeVpn):
     # run vpn stats script
-    evaluated_usage = {'upload'=>50, 'download'=>75, 'score'=>5, 'state'=>empty}
+    evaluated_usage = {'upload'=>50, 'download'=>75, 'score'=>5, 'action'=>''}
     if evaluated_usage.upload > 5 && evaluated_usage.download == 0:
-        evaluated_usage.state = onlyUpload
-        activeVpn.score++;
+        activeVpn.onlyUploadCount++;
+        if activeVpn.onlyUploadCount >= 3
+            evaluated_usage.action = 'rotate'
+        else
+            evaluated_usage.action = 'keep'
     else if evaluated_usage.download > 5 && evaluated_usage.download < 10:
-        evaluated_usage.state = smallDownload
-        activeVpn.score++;
-    else if evaluated_usage.download > 10:
-        evaluated_usage.state = normalDownload
-        activeVpn.score++;
+        activeVpn.smallDownloadCount++;
+        if activeVpn.smallDownloadCount >= 3
+            evaluated_usage.action = 'rotate'
+        else
+            evaluated_usage.action = 'keep'
     else
-        evaluated_usage.state = swap
-        activeVpn.score--;
+        evaluated_usage.action = 'keep'
 
     activeVpn.upload += evaluated_usage.upload
     activeVpn.download += evaluated_usage.download
     return (evaluated_usage, activeVpn)
+
+async def rotate_or_remove_vpn(activeVpn):
+    upsert_vpn({'id'=> activeVpn.id, 'score'=>activeVpn.score, 'upload'=>activeVpn.upload, 'download'=>activeVpn.download})
+    clear_active_vpn()
+    if activeVpn.score <= 3
+        # retire script
+    else
+        # rotate script
