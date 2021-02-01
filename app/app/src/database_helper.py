@@ -3,6 +3,7 @@ import sqlalchemy
 from sqlalchemy.sql import exists
 from sqlalchemy.sql import func
 from sqlalchemy.sql import asc
+from sqlalchemy import func
 
 # Configuration from environment variables or '.env' file.
 config = Config('.env')
@@ -37,7 +38,7 @@ async def populate_table():
         print(f)
 
 async def upsert_vpn(data):
-    vpn = vpns.query.filter_by(id == data['id']).first()
+    vpn = vpns.query.filter_by(id == data['id']).first() if data['id'] > 0 else null
     if vpn == null:
         query = vpns.insert().values(
            name=data["name"],
@@ -71,3 +72,8 @@ async def has_vpns():
     return database.query(vpns).first() is not None
 
 async def active_vpn():
+
+
+async def get_random_vpn():
+    stmt = database.query(vpns).order_by(func.random())
+    return stmt.first()
