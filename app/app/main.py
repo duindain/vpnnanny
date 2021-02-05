@@ -6,7 +6,7 @@ import databases
 import sqlalchemy
 from starlette.config import Config
 from starlette.routing import Route
-from ./src/ import database_helper
+from app.src import database_helper
 
 async def list_vpns(request):
     return JSONResponse(await get_vpns())
@@ -27,6 +27,6 @@ routes = [
 app = Starlette(
     debug=True,
     routes=routes,
-    on_startup=[database.connect],
-    on_shutdown=[database.disconnect]
+    on_startup=[database_helper.database.connect],
+    on_shutdown=[database_helper.database.disconnect]
 )

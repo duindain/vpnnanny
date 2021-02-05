@@ -4,6 +4,7 @@ from sqlalchemy.sql import exists
 from sqlalchemy.sql import func
 from sqlalchemy.sql import asc
 from sqlalchemy import func
+from starlette.config import Config
 
 # Configuration from environment variables or '.env' file.
 config = Config('.env')
@@ -30,6 +31,7 @@ activeVpn = sqlalchemy.Table(
     metadata,
     sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True, autoincrement=True),
     sqlalchemy.Column("vpnid", sqlalchemy.Integer, nullable=False),
+    sqlalchemy.Column("path", sqlalchemy.String, nullable=False),
     sqlalchemy.Column("score", sqlalchemy.Integer, default=0),
     sqlalchemy.Column("upload", sqlalchemy.Float, default=0),
     sqlalchemy.Column("download", sqlalchemy.Float, default=0),
@@ -46,11 +48,13 @@ engine = sqlalchemy.create_engine(
 )
 metadata.create_all(engine)
 
+@classmethod
 async def populate_table():
     vpnScriptPaths = get_filepaths(config('VPNPath'), config('VPNFileExtension'))
     for f in vpnScriptPaths:
         print(f)
 
+@classmethod
 async def upsert_vpn(data):
     vpn = vpns.query.filter_by(id == data['id']).first() if data['id'] > 0 else null
     if vpn == null:
@@ -66,11 +70,13 @@ async def upsert_vpn(data):
     await database.execute(query)
     return True
 
+@classmethod
 async def upsert_active_vpn(data):
     currentVpn = activeVpn.query.filter_by(id == data['id']).first() if data['id'] > 0 else null
     if currentVpn == null:
         query = activeVpn.insert().values(
            name=data["name"],
+           path=data["path"],
            vpnid=data['vpnid'])
     else:
        query = activeVpn.update().values(
@@ -83,6 +89,7 @@ async def upsert_active_vpn(data):
     await database.execute(query)
     return True
 
+@classmethod
 async def get_vpns():
     query = vpns.select().order_by(asc(vpns.c.updatedOn))
     results = await database.fetch_all(query)
@@ -95,20 +102,25 @@ async def get_vpns():
     ]
     return content
 
+@classmethod
 async def has_vpns():
     return database.query(vpns).first() is not None
 
+@classmethod
 async def active_vpn():
     currentVpn = database.query(activeVpn).first()
-    if currentVpn is None
-        currentVpn = get_random_vpn
-        upsert_active_vpn({'id'=> 0, 'vpnid'=>currentVpn.id})
+    if not currentVpn:
+        currentVpn = get_random_vpn()
+        upsert_active_vpn({'id':0, 'vpnid':currentVpn.id})
         return await active_vpn()
     return currentVpn
 
+@classmethod
 async def get_random_vpn():
     stmt = database.query(vpns).order_by(func.random())
     return stmt.first()
 
+@classmethod
 async def clear_active_vpn():
-    database.query(activeVpn).truncate()
+    database.query(activeVpn).delete()
+    database.commit()
